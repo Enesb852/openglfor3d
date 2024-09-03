@@ -83,7 +83,7 @@ clean: CMakeFiles/Opengl3dProject.dir/clean
 CMakeFiles/glad.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/glad.dir/build.make CMakeFiles/glad.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/glad.dir/build.make CMakeFiles/glad.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/enes/openglfor3d/build/CMakeFiles --progress-num=3,4 "Built target glad"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/enes/openglfor3d/build/CMakeFiles --progress-num=4,5 "Built target glad"
 .PHONY : CMakeFiles/glad.dir/all
 
 # Build rule for subdir invocation for target.
@@ -109,12 +109,12 @@ CMakeFiles/glad.dir/clean:
 CMakeFiles/Opengl3dProject.dir/all: CMakeFiles/glad.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Opengl3dProject.dir/build.make CMakeFiles/Opengl3dProject.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Opengl3dProject.dir/build.make CMakeFiles/Opengl3dProject.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/enes/openglfor3d/build/CMakeFiles --progress-num=1,2 "Built target Opengl3dProject"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/enes/openglfor3d/build/CMakeFiles --progress-num=1,2,3 "Built target Opengl3dProject"
 .PHONY : CMakeFiles/Opengl3dProject.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/Opengl3dProject.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/enes/openglfor3d/build/CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/enes/openglfor3d/build/CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/Opengl3dProject.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/enes/openglfor3d/build/CMakeFiles 0
 .PHONY : CMakeFiles/Opengl3dProject.dir/rule

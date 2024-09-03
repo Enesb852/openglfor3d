@@ -281,6 +281,9 @@ Opengl3dProject_SOURCE_DIR:STATIC=/home/enes/openglfor3d
 //The directory containing a CMake configuration file for glfw3.
 glfw3_DIR:PATH=/usr/lib/cmake/glfw3
 
+//The directory containing a CMake configuration file for stb.
+stb_DIR:PATH=stb_DIR-NOTFOUND
+
 
 ########################
 # INTERNAL cache entries

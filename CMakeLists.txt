@@ -11,6 +11,7 @@ find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 set(SOURCES
 	src/main.cpp
+	src/stb_image.cpp
 	)
 
 include_directories(include)

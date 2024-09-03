@@ -1,9 +1,14 @@
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <stb_image.h>
 
 std::string loadShaderSrc(const std::string& fileName)
 {
@@ -88,22 +93,36 @@ int main(void)
 
     // Köşe verilerini tanımla
     GLfloat vertices[] = {
-    // İlk köşe (sol alt)
-        -0.5f, -0.5f, 0.0f, 
-    // İkinci köşe (üst)
-        0.0f,  0.5f, 0.0f,  
+    // (sol alt)köşe
+        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 
+    // (üst)köşe 
+        0.0f,  0.5f, 0.0f,      0.5f, 1.0f,
     // Üçüncü köşe (sağ alt)
-        0.5f, -0.5f, 0.0f  
+        0.5f, -0.5f, 0.0f,      1.0f, 0.0f
     };
 
-    unsigned int shaderProgram = compileShader("vshader.glsl", "fshader.glsl");
-    if (shaderProgram == 0) {
-        std::cerr << "Failed to create shader program." << std::endl;
-        return -1;
-    }
-
+    GLuint shaderProgram = compileShader("vertex_shader.glsl", "fragment_shader.glsl");
     glUseProgram(shaderProgram);
 
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load("../res/wall.jpg", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
+    glUniform1i(glGetUniformLocation(shaderProgram, "ourTexture"), 0);
+    
     GLuint VAO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -115,8 +134,10 @@ int main(void)
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Köşe verilerini etkinleştir
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // VAO'yu serbest bırakın
     glBindVertexArray(0);
@@ -127,11 +148,16 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // bind textures on corresponding texture units
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
         // Shader programını kullan
         glUseProgram(shaderProgram);
 
-        // VAO'yu bağlayın ve Üçgeni çizin
+        // VAO'yu bağlayın
         glBindVertexArray(VAO);
+        
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
 
