@@ -1,4 +1,0 @@
-/home/enes/openglfor3d/build/CMakeFiles/glad.dir
-/home/enes/openglfor3d/build/CMakeFiles/Opengl3dProject.dir
-/home/enes/openglfor3d/build/CMakeFiles/edit_cache.dir
-/home/enes/openglfor3d/build/CMakeFiles/rebuild_cache.dir
