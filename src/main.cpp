@@ -11,13 +11,58 @@
 #include <stb_image.h>
 
 
+float deltaTime = 0.0f;// Time between current frame and last frame
+float lastFrame = 0.0f;// Time of last frame
+
 glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
 
+float yaw = -90.0f;  // Başlangıçta -90 derece (düz ileri bakar)
+float pitch = 0.0f;  // Başlangıçta yukarı/aşağı eğim yok
+float fov = 45.0f;  // Kamera zoom için kullanılabilir (FOV - Field of View)
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    static float lastX = 400, lastY = 300;  // Fare başlangıç pozisyonu
+    static bool firstMouse = true;
+
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xOffset = xpos - lastX;
+    float yOffset = lastY - ypos;  // Y'nin ters çevrilmesi lazım, çünkü y ekseni yukarıdan aşağıya artar
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.1f;  // Fare hassasiyeti
+    xOffset *= sensitivity;
+    yOffset *= sensitivity;
+
+    yaw += xOffset;
+    pitch += yOffset;
+
+    // Pitch sınırlandırılır
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    // Yön vektörünü hesapla
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
+}
+
 void processInput(GLFWwindow *window)
 {
-    const float cameraSpeed = 0.05f; // adjust accordingly
+    const float cameraSpeed = deltaTime * 2.5f;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -26,6 +71,14 @@ void processInput(GLFWwindow *window)
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE))
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    else { 
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+
 }
 
 std::string loadShaderSrc(const std::string& fileName)
@@ -90,6 +143,7 @@ GLint compileShader(const std::string& vertexPath, const std::string& fragmentPa
 
 int main(void)
 {
+
     GLFWwindow* window;
 
     /* Initialize the library */
@@ -97,7 +151,7 @@ int main(void)
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(800, 600, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(1280, 800, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -184,9 +238,7 @@ int main(void)
     else
     {
         std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-
+    } stbi_image_free(data);
     glUniform1i(glGetUniformLocation(shaderProgram, "ourTexture"), 0);
 
     // create transformations
@@ -197,9 +249,8 @@ int main(void)
     unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
     unsigned int viewLoc  = glGetUniformLocation(shaderProgram, "view");
     unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    projection = glm::perspective(glm::radians(85.0f), (float)800 / (float)600, 0.1f, 100.0f);
+    projection = glm::perspective(glm::radians(85.0f), (float)1280 / (float)800, 0.1f, 100.0f);
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
 
     GLuint VAO;
     glGenVertexArrays(1, &VAO);
@@ -216,21 +267,28 @@ int main(void)
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
-    
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
+        glfwSetCursorPosCallback(window, mouse_callback);
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
+        // Enable depth test
         glEnable(GL_DEPTH_TEST);  
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        glClearColor(0.0f, 0.0f, 1.0f, 0.5f);
         // bind textures on corresponding texture units
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -245,7 +303,7 @@ int main(void)
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
